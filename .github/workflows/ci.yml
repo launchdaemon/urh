@@ -16,24 +16,10 @@ on:
 
 jobs:
   ci:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-    #    os: [ubuntu-24.04-arm]
-        os: [macos-15]
-        python-version: ['3.13']
-    #    python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
-        #architecture: [x64]
-        architecture: [arm64]
-    #    include:
-    #      - os: windows-latest
-    #        python-version: '3.13'
-    #        architecture: x64
-    #      - os: macos-15
-    #        python-version: '3.13'
-    #        #architecture: x64
-    #- os: macos-15
-      fail-fast: false
+    #runs-on: ${{ matrix.os }}
+    runs-on: macos-15
+    #python-version: ['3.13']
+    #architecture: [arm64]
 
     steps:
       - uses: actions/checkout@v4
@@ -41,8 +27,8 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-          architecture: ${{ matrix.architecture }}
+          python-version: 3.13
+          #architecture: ${{ matrix.architecture }}
 
       - name: Install Dependencies
         run: |
@@ -98,11 +84,11 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ os }}-${{ python-version }}
+          name: dist-${{ vars.os }}-${{ vars.python-version }}
           path: dist
 
       - name: Run pytest without coverage
-        if: ${{ !startsWith(matrix.os, 'ubuntu') || matrix.python-version != '3.12' }}
+        #if: ${{ !startsWith(matrix.os, 'ubuntu') || matrix.python-version != '3.12' }}
         run: pytest -s -v --junitxml=junit/test-results.xml tests
 
       - uses: ncipollo/release-action@v1
