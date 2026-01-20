@@ -16,12 +16,15 @@ on:
 
 jobs:
   ci:
-    #runs-on: ${{ matrix.os }}
-    #strategy:
-    #  matrix:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
     #    os: [ubuntu-24.04-arm]
+        os: [macos-15]
+        python-version: ['3.13']
     #    python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
         #architecture: [x64]
+        architecture: [arm64]
     #    include:
     #      - os: windows-latest
     #        python-version: '3.13'
@@ -29,8 +32,7 @@ jobs:
     #      - os: macos-15
     #        python-version: '3.13'
     #        #architecture: x64
-    - os: macos-15
-      python-version: '3.13'
+    #- os: macos-15
       fail-fast: false
 
     steps:
