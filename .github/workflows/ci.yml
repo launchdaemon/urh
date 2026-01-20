@@ -19,16 +19,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-24.04-arm]
         python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
-        architecture: [x64]
+        #architecture: [x64]
         include:
           - os: windows-latest
             python-version: '3.13'
             architecture: x64
-          - os: macos-15-intel
+          - os: macos-15
             python-version: '3.13'
-            architecture: x64
+            #architecture: x64
       fail-fast: false
 
     steps:
@@ -40,17 +40,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           architecture: ${{ matrix.architecture }}
 
-      - name: Setup SDR Drivers (Windows)
-        if: startsWith(matrix.os, 'windows')
-        run: |
-          choco install wget --no-progress
-          wget -nv -O windrivers.zip https://github.com/jopohl/sdrbuild/releases/download/v1.1/win-$ARCH.zip
-          7z x windrivers.zip -osrc/urh/dev/native/lib/shared
-          ls src/urh/dev/native/lib/shared
-        shell: bash
-        env:
-          ARCH: ${{ matrix.architecture }}
-
       - name: Install Dependencies
         run: |
           pip install wheel
@@ -60,23 +49,20 @@ jobs:
             sudo apt-get update
             sudo apt-get install libhackrf-dev librtlsdr-dev xvfb libxkbcommon-x11-0 x11-utils libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libegl1 libxcb-cursor0
             pip install PyVirtualDisplay==0.2.5
-          elif [[ $OS == windows* ]]
-          then
-            pip install pywin32 pyaudio
           elif [[ $OS == mac* ]] 
           then
             brew install airspy hackrf librtlsdr libbladerf limesuite portaudio uhd
             
-            wget -nv https://github.com/analogdevicesinc/libiio/releases/download/v0.23/macOS-10.15.pkg
-            sudo installer -pkg macOS-10.15.pkg -target /
+            wget -nv https://github.com/analogdevicesinc/libiio/releases/download/v0.26/libiio-0.26.ga0eca0d-macOS-13-arm64.pkg
+            sudo installer -pkg libiio-0.26.ga0eca0d-macOS-13-arm64.pkg -target /
             sudo cp /Library/Frameworks/iio.framework/iio /usr/local/lib/libiio.dylib
             sudo install_name_tool -id "/usr/local/lib/libiio.dylib" /usr/local/lib/libiio.dylib
             file /usr/local/lib/libiio.dylib
             otool -L /usr/local/lib/libiio.dylib
-            sudo cp /Library/Frameworks/iio.framework/Versions/0.23/Headers/iio.h /usr/local/include
+            sudo cp /Library/Frameworks/iio.framework/Versions/0.26/Headers/iio.h /usr/local/include
             
-            wget -nv https://www.sdrplay.com/software/SDRplay_RSP_API-MacOSX-2.13.2.pkg
-            sudo installer -pkg SDRplay_RSP_API-MacOSX-2.13.2.pkg -target /  
+            wget -nv https://www.sdrplay.com/software/SDRplayAPI-macos-installer-universal-3.15.1.pkg
+            sudo installer -pkg SDRplayAPI-macos-installer-universal-3.15.1.pkg -target /  
           
             pip install pyaudio
             pip install pillow
@@ -122,13 +108,6 @@ jobs:
         env:
           PYARCH: ${{ matrix.architecture }}
 
-      - name: Check urh_debug.exe
-        if: startsWith(matrix.os, 'windows')
-        run: |
-          cd pyinstaller\urh
-          urh_debug.exe autoclose
-        shell: cmd
-
       - name: Build DMG
         if: startsWith(matrix.os, 'macos')
         run: |
@@ -163,25 +142,9 @@ jobs:
       - uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          artifacts: "dist/*.exe,dist/*.dmg"
+          artifacts: "dist/*.dmg"
           token: ${{ secrets.GITHUB_TOKEN }}
           allowUpdates: true
           generateReleaseNotes: true
           omitBodyDuringUpdate: true
           omitNameDuringUpdate: true
-
-      - name: Upload to PyPi
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          if [[ $OS == ubuntu* ]]
-          then
-            twine upload --skip-existing dist/*
-          else
-            twine upload --skip-existing dist/*.whl
-          fi
-        shell: bash
-        env:
-          TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
-          TWINE_PASSWORD: ${{ secrets.TWINE_PASSWORD }}
-          TWINE_REPOSITORY_URL: "https://upload.pypi.org/legacy/"
-          OS: ${{ matrix.os }}
