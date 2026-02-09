@@ -34,29 +34,22 @@ jobs:
         run: |
           pip install wheel
           pip install -r data/requirements.txt
-          if [[ $OS == ubuntu* ]]
-          then
-            sudo apt-get update
-            sudo apt-get install libhackrf-dev librtlsdr-dev xvfb libxkbcommon-x11-0 x11-utils libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libegl1 libxcb-cursor0
-            pip install PyVirtualDisplay==0.2.5
-          elif [[ $OS == mac* ]] 
-          then
-            brew install airspy hackrf librtlsdr libbladerf limesuite portaudio uhd
+          brew install airspy hackrf librtlsdr libbladerf limesuite portaudio uhd
             
-            wget -nv https://github.com/analogdevicesinc/libiio/releases/download/v0.26/libiio-0.26.ga0eca0d-macOS-13-arm64.pkg
-            sudo installer -pkg libiio-0.26.ga0eca0d-macOS-13-arm64.pkg -target /
-            sudo cp /Library/Frameworks/iio.framework/iio /usr/local/lib/libiio.dylib
-            sudo install_name_tool -id "/usr/local/lib/libiio.dylib" /usr/local/lib/libiio.dylib
-            file /usr/local/lib/libiio.dylib
-            otool -L /usr/local/lib/libiio.dylib
-            sudo cp /Library/Frameworks/iio.framework/Versions/0.26/Headers/iio.h /usr/local/include
+          wget -nv https://github.com/analogdevicesinc/libiio/releases/download/v0.26/libiio-0.26.ga0eca0d-macOS-13-arm64.pkg
+          sudo installer -pkg libiio-0.26.ga0eca0d-macOS-13-arm64.pkg -target /
+          sudo cp /Library/Frameworks/iio.framework/iio /usr/local/lib/libiio.dylib
+          sudo install_name_tool -id "/usr/local/lib/libiio.dylib" /usr/local/lib/libiio.dylib
+          file /usr/local/lib/libiio.dylib
+          otool -L /usr/local/lib/libiio.dylib
+          sudo cp /Library/Frameworks/iio.framework/Versions/0.26/Headers/iio.h /usr/local/include
             
-            wget -nv https://www.sdrplay.com/software/SDRplayAPI-macos-installer-universal-3.15.1.pkg
-            sudo installer -pkg SDRplayAPI-macos-installer-universal-3.15.1.pkg -target /  
+          wget -nv https://www.sdrplay.com/software/SDRplayAPI-macos-installer-universal-3.15.1.pkg
+          sudo installer -pkg SDRplayAPI-macos-installer-universal-3.15.1.pkg -target /  
           
-            pip install pyaudio
-            pip install pillow
-          fi
+          pip install pyaudio
+          pip install pillow
+
           pip install twine setuptools pytest pytest-xvfb pytest-cov appdirs packaging pyinstaller
           python -c "import tempfile, os; open(os.path.join(tempfile.gettempdir(), 'urh_releasing'), 'w').close()"
         shell: bash
