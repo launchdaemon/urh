@@ -38,6 +38,7 @@ jobs:
             
           wget -nv https://github.com/analogdevicesinc/libiio/releases/download/v0.26/libiio-0.26.ga0eca0d-macOS-13-arm64.pkg
           sudo installer -pkg libiio-0.26.ga0eca0d-macOS-13-arm64.pkg -target /
+          sudo mkdir -p /usr/local/lib
           sudo cp /Library/Frameworks/iio.framework/iio /usr/local/lib/libiio.dylib
           sudo install_name_tool -id "/usr/local/lib/libiio.dylib" /usr/local/lib/libiio.dylib
           file /usr/local/lib/libiio.dylib
